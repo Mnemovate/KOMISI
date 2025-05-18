@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pembagian Komisi</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .card-header {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #2d3748;
+            border-bottom: 1px solid #edf2f7;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .btn {
+            background-color: #4299e1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .btn:hover {
+            background-color: #3182ce;
+        }
+        .btn-secondary {
+            background-color: #a0aec0;
+        }
+        .btn-secondary:hover {
+            background-color: #718096;
+        }
+        .flex {
+            display: flex;
+            gap: 10px;
+        }
+        .level-inputs {
+            margin-top: 15px;
+        }
+        .result-container {
+            margin-top: 30px;
+        }
+        .result-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .total-komisi {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            padding: 15px 0;
+            color: #2d3748;
+        }
+        .uppline-list {
+            list-style: none;
+            padding: 0;
+        }
+        .uppline-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #edf2f7;
+        }
+        .uppline-item:last-child {
+            border-bottom: none;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        .highlight {
+            color: #4299e1;
+            font-weight: 600;
+        }
+        .perusahaan-komisi {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #2d3748;
+            padding: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sistem Pembagian Komisi</h1>
+        
+        <div class="card">
+            <div class="card-header">Input Data</div>
+            <div class="form-group">
+                <label for="mktcode">Marketing Code (Perekrut):</label>
+                <input type="text" id="mktcode" placeholder="Contoh: MKT0002">
+            </div>
+            <div class="form-group">
+                <label for="usrtree">User Tree (Dipisahkan dengan #):</label>
+                <input type="text" id="usrtree" placeholder="Contoh: MKT0001#MKT0002">
+            </div>
+            <button class="btn" id="parseUserTree">Parse User Tree</button>
+            
+            <div id="levelInputs" class="level-inputs">
+                <!-- Input level akan ditambahkan di sini -->
+            </div>
+            
+            <div class="form-group" style="margin-top: 20px;">
+                <button class="btn" id="generateKomisi">Generate Pembagian Komisi</button>
+            </div>
+        </div>
+        
+        <div id="resultContainer" class="result-container" style="display:none;">
+            <div class="card">
+                <div class="card-header">Total Komisi</div>
+                <div class="total-komisi" id="totalKomisi">2,1 JT</div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">Perekrut</div>
+                <div id="perekrutInfo">
+                    <!-- Info perekrut akan ditampilkan di sini -->
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">Uppline</div>
+                <ul class="uppline-list" id="upplineList">
+                    <!-- List uppline akan ditampilkan di sini -->
+                </ul>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">Komisi Perusahaan</div>
+                <div class="perusahaan-komisi" id="perusahaanKomisi">600K</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const parseButton = document.getElementById('parseUserTree');
+            const generateButton = document.getElementById('generateKomisi');
+            const levelInputsContainer = document.getElementById('levelInputs');
+            const resultContainer = document.getElementById('resultContainer');
+            
+            // Event listener untuk tombol Parse User Tree
+            parseButton.addEventListener('click', function() {
+                const usrtree = document.getElementById('usrtree').value;
+                if (!usrtree) {
+                    alert('Mohon masukkan User Tree terlebih dahulu!');
+                    return;
+                }
+                
+                // Parse user tree
+                const marketingCodes = usrtree.split('#');
+                
+                // Hapus input level yang sudah ada
+                levelInputsContainer.innerHTML = '<div class="card-header">Input Level Marketing</div>';
+                
+                // Buat input level untuk setiap marketing code
+                marketingCodes.forEach(code => {
+                    const formGroup = document.createElement('div');
+                    formGroup.className = 'form-group';
+                    
+                    const label = document.createElement('label');
+                    label.textContent = `Level untuk ${code}:`;
+                    label.setAttribute('for', `level-${code}`);
+                    
+                    const select = document.createElement('select');
+                    select.id = `level-${code}`;
+                    select.name = `level-${code}`;
+                    
+                    // Tambahkan opsi level 1-4
+                    for(let i = 1; i <= 4; i++) {
+                        const option = document.createElement('option');
+                        option.value = i;
+                        option.textContent = `Level ${i}`;
+                        select.appendChild(option);
+                    }
+                    
+                    formGroup.appendChild(label);
+                    formGroup.appendChild(select);
+                    levelInputsContainer.appendChild(formGroup);
+                });
+            });
+            
+            // Event listener untuk tombol Generate Komisi
+            generateButton.addEventListener('click', function() {
+                const mktcode = document.getElementById('mktcode').value;
+                const usrtree = document.getElementById('usrtree').value;
+                
+                if (!mktcode || !usrtree) {
+                    alert('Mohon lengkapi data Marketing Code dan User Tree!');
+                    return;
+                }
+                
+                // Cek apakah mktcode ada dalam usrtree
+                const marketingCodes = usrtree.split('#');
+                if (!marketingCodes.includes(mktcode)) {
+                    alert('Marketing Code perekrut harus ada dalam User Tree!');
+                    return;
+                }
+                
+                // Kumpulkan data level
+                const levels = {};
+                let allLevelsSet = true;
+                
+                marketingCodes.forEach(code => {
+                    const levelSelect = document.getElementById(`level-${code}`);
+                    if (levelSelect) {
+                        levels[code] = parseInt(levelSelect.value);
+                    } else {
+                        allLevelsSet = false;
+                    }
+                });
+                
+                if (!allLevelsSet) {
+                    alert('Mohon klik "Parse User Tree" dan isi semua level terlebih dahulu!');
+                    return;
+                }
+                
+                // Hitung pembagian komisi
+                const komisiResult = hitungKomisi(mktcode, usrtree, levels);
+                
+                // Tampilkan hasil
+                renderHasil(komisiResult);
+                resultContainer.style.display = 'block';
+            });
+            
+            function hitungKomisi(mktcode, usrtree, levels) {
+                const TOTAL_KOMISI = 2100000; // 2,1 JT dalam rupiah
+                const marketingCodes = usrtree.split('#');
+                const perekrutLevel = levels[mktcode];
+                
+                let komisiPerekrut = 0;
+                let komisiUppline = [];
+                let sisaKomisi = TOTAL_KOMISI;
+                
+                // Tentukan komisi perekrut berdasarkan level
+                switch (perekrutLevel) {
+                    case 1:
+                        komisiPerekrut = 1000000; // 1 JT
+                        break;
+                    case 2:
+                        komisiPerekrut = 1500000; // 1,5 JT
+                        break;
+                    case 3:
+                        komisiPerekrut = 2000000; // 2 JT
+                        break;
+                    case 4:
+                        komisiPerekrut = 2100000; // 2,1 JT
+                        break;
+                }
+                
+                sisaKomisi -= komisiPerekrut;
+                
+                // Identifikasi posisi perekrut dalam user tree
+                const perekrutIndex = marketingCodes.indexOf(mktcode);
+                
+                // Dapatkan marketing codes yang berada dalam usrtree perekrut
+                // dan urutkan dari perekrut ke uppline (terbalik dari urutan usrtree)
+                const upplines = marketingCodes.slice(0, perekrutIndex).reverse();
+                
+                // Counter untuk menghitung jumlah marketing pada setiap level
+                let level2Count = 0;
+                let level3Count = 0;
+                let level4Count = 0;
+                
+                // Nilai komisi untuk masing-masing level
+                const komisiLevel2 = [500000, 200000, 150000]; // 500K, 200K, 150K
+                
+                // Lacak level sebelumnya untuk memeriksa kenaikan/penurunan
+                let previousLevel = perekrutLevel;
+                
+                // Bagikan komisi ke uppline berdasarkan posisi dalam usrtree (dari perekrut ke atas)
+                for (let i = 0; i < upplines.length; i++) {
+                    const code = upplines[i];
+                    const upplineLevel = levels[code];
+                    const position = i + 2; // +2 karena posisi 1 adalah perekrut
+                    
+                    // Cek apakah level naik atau sama dibandingkan dengan level sebelumnya
+                    const isLevelIncreasing = upplineLevel >= previousLevel;
+                    
+                    if (isLevelIncreasing) {
+                        let komisi = 0;
+                        
+                        // Tentukan komisi berdasarkan level
+                        if (upplineLevel === 2 && level2Count < 3) {
+                            komisi = level2Count < komisiLevel2.length ? komisiLevel2[level2Count] : 0;
+                            level2Count++;
+                        } else if (upplineLevel === 3 && level3Count < 1) {
+                            // Level 3 mendapat 500K jika di posisi awal, 150K jika di posisi 4+
+                            if (position >= 4) {
+                                komisi = 150000; // 150K
+                            } else {
+                                komisi = 500000; // 500K
+                            }
+                            level3Count++;
+                        } else if (upplineLevel === 4 && level4Count < 1) {
+                            komisi = 100000; // 100K
+                            level4Count++;
+                        }
+                        
+                        // Pastikan sisa komisi cukup
+                        if (komisi > 0 && sisaKomisi >= komisi) {
+                            komisiUppline.push({
+                                mktcode: code,
+                                level: upplineLevel,
+                                komisi: formatRupiah(komisi),
+                                position: position
+                            });
+                            
+                            sisaKomisi -= komisi;
+                        }
+                    }
+                    
+                    // Update level sebelumnya untuk perbandingan berikutnya
+                    previousLevel = upplineLevel;
+                }
+                
+                return {
+                    total_komisi: "2,1 JT",
+                    perekrut: {
+                        mktcode: mktcode,
+                        usrtree: usrtree,
+                        level: perekrutLevel,
+                        komisi: formatRupiah(komisiPerekrut),
+                        position: 1
+                    },
+                    uppline: komisiUppline,
+                    perusahaan: formatRupiah(sisaKomisi)
+                };
+            }
+            
+            function formatRupiah(amount) {
+                if (amount >= 1000000) {
+                    return (amount / 1000000).toFixed(1).replace(/\.0$/, '') + " JT";
+                } else if (amount >= 1000) {
+                    return (amount / 1000).toFixed(0) + "K";
+                } else {
+                    return amount.toString();
+                }
+            }
+            
+            function renderHasil(result) {
+                // Tampilkan total komisi
+                document.getElementById('totalKomisi').textContent = result.total_komisi;
+                
+                // Tampilkan info perekrut
+                const perekrutInfo = document.getElementById('perekrutInfo');
+                perekrutInfo.innerHTML = `
+                    <div class="info-row">
+                        <span>Marketing Code:</span>
+                        <span class="highlight">${result.perekrut.mktcode}</span>
+                    </div>
+                    <div class="info-row">
+                        <span>User Tree:</span>
+                        <span>${result.perekrut.usrtree}</span>
+                    </div>
+                    <div class="info-row">
+                        <span>Level:</span>
+                        <span>Level ${result.perekrut.level}</span>
+                    </div>
+                    <div class="info-row">
+                        <span>Posisi:</span>
+                        <span>${result.perekrut.position}</span>
+                    </div>
+                    <div class="info-row">
+                        <span>Komisi:</span>
+                        <span class="highlight">${result.perekrut.komisi}</span>
+                    </div>
+                `;
+                
+                // Tampilkan list uppline
+                const upplineList = document.getElementById('upplineList');
+                upplineList.innerHTML = '';
+                
+                if (result.uppline.length === 0) {
+                    upplineList.innerHTML = '<li class="uppline-item">Tidak ada uppline yang mendapat komisi</li>';
+                } else {
+                    result.uppline.forEach(uppline => {
+                        const li = document.createElement('li');
+                        li.className = 'uppline-item';
+                        li.innerHTML = `
+                            <div class="info-row">
+                                <span>Marketing Code:</span>
+                                <span class="highlight">${uppline.mktcode}</span>
+                            </div>
+                            <div class="info-row">
+                                <span>Level:</span>
+                                <span>Level ${uppline.level}</span>
+                            </div>
+                            <div class="info-row">
+                                <span>Posisi:</span>
+                                <span>${uppline.position}</span>
+                            </div>
+                            <div class="info-row">
+                                <span>Komisi:</span>
+                                <span class="highlight">${uppline.komisi}</span>
+                            </div>
+                        `;
+                        upplineList.appendChild(li);
+                    });
+                }
+                
+                // Tampilkan komisi perusahaan
+                document.getElementById('perusahaanKomisi').textContent = result.perusahaan;
+            }
+        });
+    </script>
+</body>
+</html>
