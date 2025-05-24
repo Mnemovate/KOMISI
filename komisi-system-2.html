@@ -472,6 +472,25 @@
                     upplineList.innerHTML = '<li class="uppline-item">Tidak ada uppline yang mendapat komisi</li>';
                 } else {
                     result.uppline.forEach(uppline => {
+                        let posisiLabelRevU = '';
+
+                        switch (uppline.level) {
+                        case 1:
+                            posisiLabelRevU = 'Agent';
+                            break;
+                        case 2:
+                            posisiLabelRevU = 'Perwakilan';
+                            break;
+                        case 3:
+                            posisiLabelRevU = 'Cabang Unit';
+                            break;
+                        case 4:
+                            posisiLabelRevU = 'Cabang';
+                            break;
+                        default:
+                            posisiLabelRevU = "Tidak diketahui";
+                        }
+
                         const li = document.createElement('li');
                         li.className = 'uppline-item';
                         li.innerHTML = `
@@ -481,11 +500,7 @@
                             </div>
                             <div class="info-row">
                                 <span>Level:</span>
-                                <span>Level ${uppline.level}</span>
-                            </div>
-                            <div class="info-row">
-                                <span>Posisi:</span>
-                                <span>${uppline.position}</span>
+                                <span>${posisiLabelRevU}</span>
                             </div>
                             <div class="info-row">
                                 <span>Komisi:</span>
@@ -493,6 +508,10 @@
                             </div>
                         `;
                         upplineList.appendChild(li);
+                            //                         <div class="info-row">
+                            //     <span>Posisi:</span>
+                            //     <span>${uppline.position}</span>
+                            // </div>
                     });
                 }
                 
