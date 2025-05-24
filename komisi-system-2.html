@@ -320,7 +320,8 @@
                 let level4Count = (perekrutLevel === 4) ? 1 : 0;
                 
                 // Nilai komisi untuk masing-masing level
-                const komisiLevel2 = [500000, 200000, 150000]; // 500K, 200K, 150K
+                const komisiLevel2 = [500000, 300000];
+                // const komisiLevel2 = [500000, 200000, 150000]; // 500K, 200K, 150K
                 
                 // Lacak level sebelumnya untuk memeriksa kenaikan/penurunan
                 let previousLevel = perekrutLevel;
@@ -338,13 +339,13 @@
                         let komisi = 0;
                         
                         // Tentukan komisi berdasarkan level
-                        if (upplineLevel === 2 && level2Count < 3) {
+                        if (upplineLevel === 2 && level2Count < 2) {
                             komisi = level2Count < komisiLevel2.length ? komisiLevel2[level2Count] : 0;
                             level2Count++;
                         } else if (upplineLevel === 3 && level3Count < 1) {
                             // Level 3 mendapat 500K jika di posisi awal, 150K jika di posisi 4+
                             if (position >= 4) {
-                                komisi = 150000; // 150K
+                                komisi = 200000; // 200K
                             } else {
                                 komisi = 500000; // 500K
                             }
@@ -408,13 +409,13 @@
                 case 1:
                     levelLabelRev = 'Agent';
                     break;
-                case 1:
+                case 2:
                     levelLabelRev = 'Perwakilan';
                     break;
-                case 1:
+                case 3:
                     levelLabelRev = 'Cabang Unit';
                     break;
-                case 1:
+                case 4:
                     levelLabelRev = 'Cabang';
                     break;
                 default:
