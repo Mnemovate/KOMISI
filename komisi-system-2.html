@@ -208,7 +208,25 @@
                     for(let i = 1; i <= 4; i++) {
                         const option = document.createElement('option');
                         option.value = i;
-                        option.textContent = `Level ${i}`;
+                        // option.textContent = `Level ${i}`;
+
+                        switch (i) {
+                            case 1:
+                            option.textContent = 'Agent';
+                            break;
+                            case 2:
+                            option.textContent = 'Perwakilan';
+                            break;
+                            case 3:
+                            option.textContent = 'Cabang Unit';
+                            break;
+                            case 4:
+                            option.textContent = 'Cabang';
+                            break;
+                            default:
+                            option.textContent = `Level ${i}`;
+                        }
+
                         select.appendChild(option);
                     }
                     
@@ -381,6 +399,45 @@
                 // Tampilkan total komisi
                 document.getElementById('totalKomisi').textContent = result.total_komisi;
                 
+                let levelLabelRev = '';
+                let posisiLabelRev = '';
+
+                console.log(result.perekrut.level);
+
+                switch (result.perekrut.level) {
+                case 1:
+                    levelLabelRev = 'Agent';
+                    break;
+                case 1:
+                    levelLabelRev = 'Perwakilan';
+                    break;
+                case 1:
+                    levelLabelRev = 'Cabang Unit';
+                    break;
+                case 1:
+                    levelLabelRev = 'Cabang';
+                    break;
+                default:
+                    levelLabelRev = "Tidak diketahui";
+                }
+
+                switch (result.perekrut.position) {
+                case 1:
+                    posisiLabelRev = 'Agent';
+                    break;
+                case 2:
+                    posisiLabelRev = 'Perwakilan';
+                    break;
+                case 3:
+                    posisiLabelRev = 'Cabang Unit';
+                    break;
+                case 4:
+                    posisiLabelRev = 'Cabang';
+                    break;
+                default:
+                    posisiLabelRev = "Tidak diketahui";
+                }
+
                 // Tampilkan info perekrut
                 const perekrutInfo = document.getElementById('perekrutInfo');
                 perekrutInfo.innerHTML = `
@@ -394,17 +451,18 @@
                     </div>
                     <div class="info-row">
                         <span>Level:</span>
-                        <span>Level ${result.perekrut.level}</span>
-                    </div>
-                    <div class="info-row">
-                        <span>Posisi:</span>
-                        <span>${result.perekrut.position}</span>
+                        <span>${levelLabelRev}</span>
                     </div>
                     <div class="info-row">
                         <span>Komisi:</span>
                         <span class="highlight">${result.perekrut.komisi}</span>
                     </div>
                 `;
+
+                    //                 <div class="info-row">
+                    //     <span>Posisi:</span>
+                    //     <span>${posisiLabelRev}</span>
+                    // </div>
                 
                 // Tampilkan list uppline
                 const upplineList = document.getElementById('upplineList');
